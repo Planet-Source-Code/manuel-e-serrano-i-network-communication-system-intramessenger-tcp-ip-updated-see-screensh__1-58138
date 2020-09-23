@@ -1,0 +1,205 @@
+Dim db As Database
+Dim rs As Recordset
+Dim elalias As String
+Dim agregado As Integer
+Dim sendalias As String
+Dim YesMatch As Integer
+Dim iSockets As Integer
+Private Declare Sub InitCommonControls Lib "comctl32.dll" ()
+
+Private Sub Command1_Click()
+On Error Resume Next
+Load sock(Index)
+sock(Index).LocalPort = 25
+sock(Index).Listen
+Command1.Enabled = False
+Command2.Enabled = True
+YesMatch = 0
+End Sub
+
+Private Sub Command2_Click()
+On Error Resume Next
+If iSockets >= 1 Then
+Dim advertencia
+advertencia = MsgBox("Precaución, todos los usuarios serán desconectados del servicio. ¿Desea continuar?", vbExclamation + vbYesNo, "Confirmación")
+If advertencia = vbYes Then
+Dim i
+For i = 0 To iSockets
+sock(i).Close
+Unload sock(i)
+Next i
+Command1.Enabled = True
+Command2.Enabled = False
+YesMatch = 0
+Else
+Exit Sub
+End If
+Else
+Dim a
+For a = 0 To iSockets
+sock(a).Close
+Unload sock(a)
+Next a
+Command1.Enabled = True
+Command2.Enabled = False
+YesMatch = 0
+End If
+End Sub
+
+Private Sub Form_Load()
+Set db = DBEngine.Workspaces(0).OpenDatabase(App.Path & "\msgdata.dat.mdb", False, False, "MS Access;PWD=G8h13k7mh")
+End Sub
+
+Private Sub sock_Close(Index As Integer)
+On Error Resume Next
+Dim i
+For i = 0 To List1.ListCount
+If Trim(Mid(List1.List(i), InStr(List1.List(i), "("))) = "(" & sock(Index).SocketHandle & ")" Then
+List1.RemoveItem (i)
+End If
+Next i
+sock(Index).Close
+Unload sock(Index)
+iSockets = iSockets - 1
+If iSockets = -1 Then
+iSockets = 0
+End If
+YesMatch = 0
+'If iSockets = 0 Then
+'Command1.Enabled = True
+'Command2.Enabled = False
+'End If
+End Sub
+
+Private Sub sock_ConnectionRequest(Index As Integer, ByVal requestID As Long)
+On Error Resume Next
+iSockets = iSockets + 1
+Load sock(iSockets)
+sock(iSockets).LocalPort = 25
+sock(iSockets).Accept requestID
+YesMatch = 0
+End Sub
+
+Private Sub sock_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+On Error Resume Next
+If Me.WindowState = vbMinimized Then
+Me.WindowState = vbNormal
+End If
+Dim strData As String
+sock(Index).GetData strData, vbString
+'Recibo de nombre de usuario que realiza una petición
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+If Mid(strData, 1, 5) = "LOGIN" Then
+Dim texto As String
+Dim usuario As String
+MsgBox strData
+texto = strData
+texto = Mid(texto, InStrRev(texto, "IMC-cl"))
+texto = Mid(texto, 13)
+eluser = strData
+eluser = Mid(eluser, 13, InStrRev(eluser, "IMC-cl") - 7)
+List1.AddItem eluser & " - " & sock(iSockets).RemoteHostIP & " (" & sock(iSockets).SocketHandle & ")"
+Set rs = db.OpenRecordset("Usuarios")
+While Not rs.EOF
+If eluser = rs!IDUsuario And texto = rs!Contraseña Then
+elalias = rs!Alias
+reply
+YesMatch = 1
+rs.MoveLast
+rs.MoveNext
+Else
+rs.MoveNext
+End If
+Wend
+rs.Clone
+If YesMatch = 0 Then
+sendatos
+End If
+End If
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+'Módulo de recepción de datos genéricos (alias, imagen, contactos...)
+'CAMBIO DE NOMBRE A MOSTRAR
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+If Mid(strData, 1, 6) = "IMC-al" Then
+Dim datax
+Dim newalias
+newalias = strData
+newalias = Mid(newalias, 7, InStrRev(newalias, "IMC-us") - 7)
+datax = strData
+datax = Mid(datax, InStrRev(datax, "IMC-us") + 6)
+Set rs = db.OpenRecordset("Usuarios")
+While Not rs.EOF
+If datax = rs!IDUsuario Then
+rs.Edit
+rs!Alias = newalias
+sendalias = newalias
+rs.Update
+DataInOut
+rs.MoveLast
+rs.MoveNext
+Else
+rs.MoveNext
+End If
+Wend
+rs.Close
+End If
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+'CAMBIO DE ESTADO DEL CLIENTE
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+If Mid(strData, 1, 6) = "IMC-st" Then
+Dim usuarioID
+Dim newstatus
+newstatus = strData
+newstatus = Mid(newstatus, 7, InStrRev(newstatus, "IMC-us") - 7)
+usuarioID = strData
+usuarioID = Mid(usuarioID, InStrRev(usuarioID, "IMC-us") + 6)
+MsgBox usuarioID
+MsgBox newstatus
+Set rs = db.OpenRecordset(usuarioID)
+Dim i
+For i = 0 To rs.RecordCount
+MsgBox rs!NombreContacto
+rs.MoveNext
+Next i
+Exit Sub
+If usuarioID = rs!IDUsuario Then
+rs.Edit
+rs!Alias = newalias
+sendalias = newalias
+rs.Update
+DataInOut
+rs.MoveLast
+rs.MoveNext
+Else
+rs.MoveNext
+End If
+'Wend
+rs.Close
+End If
+'$$$$$$$$$$$$$$$$$$$$$$$$$
+End Sub
+
+Private Sub sock_Error(Index As Integer, ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+MsgBox "Error fatal a nivel de servidor, reinicie la conexión."
+YesMatch = 0
+'sock(iSockets).Close
+End Sub
+
+Public Sub sendatos()
+On Error Resume Next
+sock(iSockets).SendData "IMS-er"
+End Sub
+
+Public Sub DataInOut()
+sock(iSockets).SendData "IMS-al" & sendalias
+End Sub
+
+Public Sub reply()
+On Error Resume Next
+sock(iSockets).SendData "IMS-ok" & vbCrLf
+sock(iSockets).SendData "IMS-al" & elalias
+End Sub
+
+Private Sub Form_Initialize()
+InitCommonControls
+End Sub

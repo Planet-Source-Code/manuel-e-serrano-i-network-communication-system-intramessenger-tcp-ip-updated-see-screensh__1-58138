@@ -1,0 +1,72 @@
+Sistema de tablas para comunicación entre cliente servidor:
+
+Respuestas básicas del servidor:
+
+ERROR = Error al autentificar
+ALLOW = Acceso permitido
+ALREA = Usuario ya iniciado, acceso denegado
+ALIAS = Actualiza el nombre a mostrar del cliente
+IMAGE = Actualiza la imagen a mostrar del cliente
+LISTA = Actualizar listas de contactos conectados
+USREG = Respuesta: usuario nuevo registrado correctamente
+EXIST = Respuesta: usuario a registrar ya existe en libreta
+DELET = Respuesta: usuario borrado satisfactoriamente de libreta
+
+Palabras que preceden a la acción:
+
+LOGIN = Proceso de autentificación
+ALIAS = Cambiar nombre a mostrar
+IMAGE = Cambiar imagen a mostrar
+NUEVO = Registra un nuevo usuario
+LISTA = Recibe o envía comandos relacionados con la lista de contactos
+TRANS = Inicio de transferencias de archivos binarios
+IMDAT = Inicio de conversación instantánea
+AGREG = Registra un nuevo usuario en la lista de contactos
+MODIF = Edita un contacto existente en la lista de contactos
+BORRA = Elimina un contacto de la lista
+UPALI = Actualizar alias de usuario que lo cambian
+
+Códigos delimitadores de datos:
+
+$$$ = NombreUsuario
+&&& = ContraseñaUsuario
+%%% = Nombre a mostrar
+@@@ = Imagen a mostrar
+
+OFF = Sin conexión
+NOA = No disponible
+IDL = Ausente
+ONL = En línea
+AWA = Vuelvo enseguida
+LUN = Salí a comer
+ONP = Al teléfono
+BLO = Usuario sin admisión
+KUS = Cierre de usuario (Logout)
+OLD = Antigüo alias
+NEW = Nuevo alias
+
+### = Invitación a conferencia
+#1# = Aceptar invitación
+#0# = Rechazar invitación
+
+&@& = Solicitud de transferencia de data
+&1& = Aceptar solicitud
+&0& = Rechazar solicitud
+
+>=< = Agregar nuevo usuario
+<=> = Bloquear o borrar usuario
+>>> = Modificar usuario existente
+=>> = Transferencia de texto (mensajería)
+<<= = Transferencia de datos (binarios)
+SND = Quien envía el mendaje o invitación
+RCE = Quien recibe el mensaje o la invitación
+MSG = Inicio del cuerpo del mensaje
+
+La sintaxis básica varía dependiendo de la función a ejercer, sin embargo siempre se requiere
+enviar el usuario que solicita la ejecución de dicha acción.
+
+EJEMPLO:
+Para iniciar sesión: LOGIN$$$USUARIO&&&CONTRASEÑA => Servidor analiza data y envía la respuesta.
+
+============================================================
+Última modificación realizada a las 07:22 p.m. el 28/09/2004.
