@@ -1,0 +1,11 @@
+PROYECTO INTRAMESSENGER
+
+Este proyecto tiene como finalidad el poder dar respuesta a las comunicaciones entre redes de
+computadoras de una forma más amena y completa. Esperemos que algún día sea tan bueno como el 
+MSN Messenger!
+
+La mayor parte del código fuente ha sido realizada por mi (Manuel E. Serrano I.) sin embargo cabe destacar que ciertas funciones han sido descargadas de diversos sitios del Internet, lamento no
+poder dar los nombres de los autores de los mismos, estaré buscando para darles un merecido 
+reconocimiento ya que sin sus contribuciones quizá hubiese sido imposible desarrollar esta aplicación (por cierto esta es la segunda versión beta, pero aún queda mucho por hacer).
+
+Gracias una vez más y saludos desde Venezuela.
